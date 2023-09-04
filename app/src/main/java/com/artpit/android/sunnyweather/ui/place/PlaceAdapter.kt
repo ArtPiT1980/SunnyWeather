@@ -16,7 +16,7 @@ class PlaceAdapter(private val fragment: Fragment, private val placeList: List<P
         val placeName: TextView = view.findViewById(R.id.placeName)
         val placeId: TextView = view.findViewById(R.id.placeId)
         val admArea1: TextView = view.findViewById(R.id.admArea1)
-        val admArea2: TextView = view.findViewById(R.id.admArea2)
+//        val admArea2: TextView = view.findViewById(R.id.admArea2)
         val country: TextView = view.findViewById(R.id.country)
         val lat: TextView = view.findViewById(R.id.lat)
         val lon: TextView = view.findViewById(R.id.lon)
@@ -35,7 +35,7 @@ class PlaceAdapter(private val fragment: Fragment, private val placeList: List<P
         holder.placeName.text = place.name
         holder.placeId.text = place.id.toString()
         holder.admArea1.text = place.adminArea
-        holder.admArea2.text = place.adminArea2
+//        holder.admArea2.text = place.adminArea2
         holder.country.text = place.country
         holder.lat.text = place.lat.toString()
         holder.lon.text = place.lon.toString()
