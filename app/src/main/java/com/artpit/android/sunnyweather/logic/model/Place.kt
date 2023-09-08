@@ -1,9 +1,7 @@
 package com.artpit.android.sunnyweather.logic.model
 
-import com.google.gson.annotations.SerializedName
-
 data class Place(
-    val id: Long,
+    val id: String,
     val name: String,
     val country: String,
     val timezone: String,
@@ -11,6 +9,6 @@ data class Place(
     val adminArea: String,
     val adminArea2: String,
     val adminArea3: String?,
-    val lon: Double,
-    val lat: Double
+    val lon: String,
+    val lat: String
 )

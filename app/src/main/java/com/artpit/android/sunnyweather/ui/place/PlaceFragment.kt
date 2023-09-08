@@ -1,5 +1,6 @@
 package com.artpit.android.sunnyweather.ui.place
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -15,9 +16,10 @@ import androidx.lifecycle.findViewTreeViewModelStoreOwner
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.artpit.android.sunnyweather.R
+import com.artpit.android.sunnyweather.ui.weather.WeatherActivity
 
 class PlaceFragment : Fragment() {
-    private val viewModel by lazy {
+    val viewModel by lazy {
         ViewModelProvider(this)[PlaceViewModel::class.java]
     }
 
@@ -42,28 +44,27 @@ class PlaceFragment : Fragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
+        if (viewModel.isPlaceSaved()) {
+            val place = viewModel.getSavedPlace()
+            val intent = Intent(context, WeatherActivity::class.java).apply {
+                putExtra("location_lng", place.lon)
+                putExtra("location_lat", place.lat)
+                putExtra("place_name", place.name)
+                putExtra("id", place.id)
+            }
+
+            startActivity(intent)
+            activity?.finish()
+            return
+        }
+
         val layoutManager = LinearLayoutManager(activity)
         recyclerView.layoutManager = layoutManager
         adapter = PlaceAdapter(this, viewModel.placeList)
         recyclerView.adapter = adapter
 
-//        searchPlaceEdit.setOnEditorActionListener { _, _, _ ->
-//            val editable = searchPlaceEdit.text
-//            val content = editable.toString()
-//
-//            if (content.isNotEmpty()) {
-//                viewModel.searchPlaces(content)
-//            } else {
-//                recyclerView.visibility = View.GONE
-//                bgImageView.visibility = View.VISIBLE
-//                viewModel.placeList.clear()
-//                adapter.notifyDataSetChanged()
-//            }
-//
-//            true
-//        }
-
-        searchPlaceEdit.addTextChangedListener { editable ->
+        searchPlaceEdit.setOnEditorActionListener { _, _, _ ->
+            val editable = searchPlaceEdit.text
             val content = editable.toString()
 
             if (content.isNotEmpty()) {
@@ -74,7 +75,22 @@ class PlaceFragment : Fragment() {
                 viewModel.placeList.clear()
                 adapter.notifyDataSetChanged()
             }
+
+            true
         }
+
+//        searchPlaceEdit.addTextChangedListener { editable ->
+//            val content = editable.toString()
+//
+//            if (content.isNotEmpty()) {
+//                viewModel.searchPlaces(content)
+//            } else {
+//                recyclerView.visibility = View.GONE
+//                bgImageView.visibility = View.VISIBLE
+//                viewModel.placeList.clear()
+//                adapter.notifyDataSetChanged()
+//            }
+//        }
 
         viewModel.placeLiveData.observe(viewLifecycleOwner, Observer { result ->
             val places = result.getOrNull()
