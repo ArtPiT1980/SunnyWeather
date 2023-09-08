@@ -1,15 +1,20 @@
 package com.artpit.android.sunnyweather.ui.weather
 
+import android.content.Context
 import android.icu.text.SimpleDateFormat
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.Layout
 import android.view.LayoutInflater
 import android.view.View
+import android.view.inputmethod.InputMethodManager
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.RelativeLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.view.GravityCompat
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -30,7 +35,23 @@ class WeatherActivity : AppCompatActivity() {
     private lateinit var lifeIndexBinding: LifeIndexBinding
     private lateinit var forecastItemBinding: ForecastItemBinding
 
-    private val viewModel by lazy {
+    private lateinit var placeName: TextView
+    private lateinit var currentTemp: TextView
+    private lateinit var currentSky: TextView
+    private lateinit var currentAQI: TextView
+
+    private lateinit var coldRiskText: TextView
+    private lateinit var dressingText: TextView
+    private lateinit var ultravioletText: TextView
+    private lateinit var carWashingText: TextView
+    private lateinit var navBtn: Button
+
+    private lateinit var nowLayout: RelativeLayout
+    private lateinit var forecastLayout: MaterialCardView
+    private lateinit var lifeIndexLayout: MaterialCardView
+    private lateinit var drawerLayout: DrawerLayout
+
+    val viewModel by lazy {
         ViewModelProvider(this)[WeatherViewModel::class.java]
     }
 
@@ -44,6 +65,23 @@ class WeatherActivity : AppCompatActivity() {
         forecastBinding = ForecastBinding.inflate(layoutInflater)
         lifeIndexBinding = LifeIndexBinding.inflate(layoutInflater)
         forecastItemBinding = ForecastItemBinding.inflate(layoutInflater)
+
+        placeName = findViewById(R.id.placeName)
+        currentTemp = findViewById(R.id.currentTemp)
+        currentSky = findViewById(R.id.currentSky)
+        currentAQI = findViewById(R.id.currentAQI)
+
+        coldRiskText = findViewById(R.id.coldRiskText)
+        dressingText = findViewById(R.id.dressingText)
+        ultravioletText = findViewById(R.id.ultravioletText)
+        carWashingText = findViewById(R.id.carWashingText)
+
+        navBtn = findViewById(R.id.navBtn)
+        drawerLayout = findViewById(R.id.drawerLayout)
+
+        nowLayout = findViewById(R.id.nowL)
+        forecastLayout = findViewById(R.id.forecastL)
+        lifeIndexLayout = findViewById(R.id.lifeIndexL)
 
         if (viewModel.locationLng.isEmpty()) {
             viewModel.locationLng = intent.getStringExtra("location_lng") ?: ""
@@ -72,29 +110,60 @@ class WeatherActivity : AppCompatActivity() {
 
                 result.exceptionOrNull()?.printStackTrace()
             }
+            binding.swipeRefresh.isRefreshing = false
         })
 
+        binding.swipeRefresh.setColorSchemeResources(R.color.colorPrimary)
+        refreshWeather()
+        binding.swipeRefresh.setOnRefreshListener {
+            refreshWeather()
+        }
+
+        navBtn.setOnClickListener {
+            drawerLayout.openDrawer(GravityCompat.START)
+        }
+
+        drawerLayout.addDrawerListener(object : DrawerLayout.DrawerListener {
+            override fun onDrawerSlide(drawerView: View, slideOffset: Float) {}
+
+            override fun onDrawerOpened(drawerView: View) {}
+
+            override fun onDrawerClosed(drawerView: View) {
+                val manager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                manager.hideSoftInputFromWindow(
+                    drawerView.windowToken,
+                    InputMethodManager.HIDE_NOT_ALWAYS
+                )
+            }
+
+            override fun onDrawerStateChanged(newState: Int) {}
+        })
+    }
+
+    fun refreshWeather() {
         viewModel.refreshWeather(
             viewModel.id,
             viewModel.locationLng,
             viewModel.locationLat
         )
+
+        binding.swipeRefresh.isRefreshing = true
     }
 
     private fun showWeatherInfo(weather: Weather) {
-        val placeName = findViewById<TextView>(R.id.placeName)
-        val currentTemp = findViewById<TextView>(R.id.currentTemp)
-        val currentSky = findViewById<TextView>(R.id.currentSky)
-        val currentAQI = findViewById<TextView>(R.id.currentAQI)
-
-        val coldRiskText = findViewById<TextView>(R.id.coldRiskText)
-        val dressingText = findViewById<TextView>(R.id.dressingText)
-        val ultravioletText = findViewById<TextView>(R.id.ultravioletText)
-        val carWashingText = findViewById<TextView>(R.id.carWashingText)
-
-        val nowLayout = findViewById<RelativeLayout>(R.id.nowL)
-        val forecastLayout = findViewById<MaterialCardView>(R.id.forecastL)
-        val lifeIndexLayout = findViewById<MaterialCardView>(R.id.lifeIndexL)
+//        val placeName = findViewById<TextView>(R.id.placeName)
+//        val currentTemp = findViewById<TextView>(R.id.currentTemp)
+//        val currentSky = findViewById<TextView>(R.id.currentSky)
+//        val currentAQI = findViewById<TextView>(R.id.currentAQI)
+//
+//        val coldRiskText = findViewById<TextView>(R.id.coldRiskText)
+//        val dressingText = findViewById<TextView>(R.id.dressingText)
+//        val ultravioletText = findViewById<TextView>(R.id.ultravioletText)
+//        val carWashingText = findViewById<TextView>(R.id.carWashingText)
+//
+//        val nowLayout = findViewById<RelativeLayout>(R.id.nowL)
+//        val forecastLayout = findViewById<MaterialCardView>(R.id.forecastL)
+//        val lifeIndexLayout = findViewById<MaterialCardView>(R.id.lifeIndexL)
 
         placeName.text = viewModel.placeName
 

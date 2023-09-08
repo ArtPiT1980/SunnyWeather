@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import com.artpit.android.sunnyweather.R
@@ -33,16 +34,30 @@ class PlaceAdapter(private val fragment: PlaceFragment, private val placeList: L
         holder.itemView.setOnClickListener {
             val position = holder.absoluteAdapterPosition
             val place = placeList[position]
-            val intent = Intent(parent.context, WeatherActivity::class.java).apply {
-                putExtra("location_lng", place.lon)
-                putExtra("location_lat", place.lat)
-                putExtra("place_name", place.name)
-                putExtra("id", place.id)
-            }
 
+            val activity = fragment.activity
+
+            if (activity is WeatherActivity) {
+                val drawerLayout = activity.findViewById<DrawerLayout>(R.id.drawerLayout)
+                drawerLayout.closeDrawers()
+                activity.viewModel.locationLng = place.lon
+                activity.viewModel.locationLat = place.lat
+                activity.viewModel.placeName = place.name
+                activity.viewModel.id = place.id
+                activity.refreshWeather()
+            } else {
+
+                val intent = Intent(parent.context, WeatherActivity::class.java).apply {
+                    putExtra("location_lng", place.lon)
+                    putExtra("location_lat", place.lat)
+                    putExtra("place_name", place.name)
+                    putExtra("id", place.id)
+                }
+
+                fragment.startActivity(intent)
+                fragment.activity?.finish()
+            }
             fragment.viewModel.savePlace(place)
-            fragment.startActivity(intent)
-            fragment.activity?.finish()
         }
 
         return holder
